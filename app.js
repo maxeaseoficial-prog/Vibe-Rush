@@ -126,11 +126,11 @@
   if (!Array.isArray(state.players) || state.players.length !== 2) state.players = [...initial.players];
   if (!DIFFICULTIES[state.difficulty]) state.difficulty = 'hard';
   if (!['all', 'clone', 'original'].includes(state.category)) state.category = 'all';
-  if (!['setup', 'draw', 'battle', 'timeup', 'judge', 'results'].includes(state.phase)) state.phase = 'setup';
+  if (!['setup', 'draw', 'briefing', 'battle', 'timeup', 'judge', 'results'].includes(state.phase)) state.phase = 'setup';
   if (!Array.isArray(state.checks) || state.checks.length !== 2) state.checks = [{}, {}];
   if (!state.timer || !Number.isFinite(state.timer.remaining)) state.timer = { ...initial.timer };
   if (state.spinning) state.spinning = false;
-  if (state.phase !== 'setup' && state.challenge == null && ['battle','timeup','judge','results'].includes(state.phase)) state.phase = 'setup';
+  if (state.phase !== 'setup' && state.challenge == null && ['briefing','battle','timeup','judge','results'].includes(state.phase)) state.phase = 'setup';
   if (state.phase === 'draw' && (!Array.isArray(state.wheelItems) || state.wheelItems.length !== 8)) state.wheelItems = [];
   let tickInterval = null;
   let spinTimeout = null;
@@ -194,7 +194,7 @@
     if (!target || !state.palette || !state.twist) return [];
     const d = DIFFICULTIES[state.difficulty];
     const result = target.features.slice(0, d.features).map((label, index) => ({ id: 'feature-' + index, label, points: d.featurePoints, kind: 'feature' }));
-    result.push({ id: 'colors', label: 'Respeitar a paleta ' + state.palette.name, detail: 'Aplicar as três cores sorteadas de forma reconhecível.', points: 10, kind: 'design' });
+    result.push({ id: 'colors', label: 'Respeitar a paleta ' + state.palette.name, detail: 'Utilize as cores ' + state.palette.colors.join(', ') + ' de forma reconhecível na interface.', points: 10, kind: 'design' });
     result.push({ id: 'twist', label: state.twist.name, detail: state.twist.detail, points: d.wildcardPoints, kind: 'wildcard' });
     result.push({ id: 'responsive', label: 'Interface responsiva', detail: 'Usável no desktop e em tela de celular.', points: 10, kind: 'quality' });
     result.push({ id: 'quality', label: target.kind === 'clone' ? 'Identidade reconhecível' : 'Experiência intuitiva', detail: target.kind === 'clone' ? 'O resultado lembra o app original sem ser só uma imagem.' : 'Os principais fluxos são fáceis de entender e usar.', points: 10, kind: 'quality' });
@@ -269,7 +269,7 @@
   }
   function hero() {
     if (state.phase !== 'setup') {
-      return `<section class="mini-hero wrap"><div class="crumb"><span class="pixel-star">✳</span> VIBE RUSH <span class="crumb-sep">/</span> ${state.phase === 'draw' ? 'SORTEIO' : state.phase === 'battle' ? 'BATALHA' : state.phase === 'timeup' ? 'TEMPO ESGOTADO' : state.phase === 'judge' ? 'AVALIAÇÃO' : 'RESULTADO'}</div><div class="mini-hero-right">TWO PLAYERS. ONE MISSION. <span class="orange">▌</span></div></section>`;
+      return `<section class="mini-hero wrap"><div class="crumb"><span class="pixel-star">✳</span> VIBE RUSH <span class="crumb-sep">/</span> ${state.phase === 'draw' ? 'SORTEIO' : state.phase === 'briefing' ? 'BRIEFING' : state.phase === 'battle' ? 'BATALHA' : state.phase === 'timeup' ? 'TEMPO ESGOTADO' : state.phase === 'judge' ? 'AVALIAÇÃO' : 'RESULTADO'}</div><div class="mini-hero-right">TWO PLAYERS. ONE MISSION. <span class="orange">▌</span></div></section>`;
     }
     return `<section class="hero wrap"><div class="hero-copy"><div class="eyebrow"><span class="pixel-star">✳</span> WELCOME TO THE VIBE CODING ARENA <span class="eyebrow-dot">●</span> ONLINE</div>
       <h1 class="hero-title">VIBE<span>RUSH</span><strong>_</strong></h1>
@@ -279,9 +279,9 @@
       <div class="hero-mascot" aria-label="Mascote do jogo"><div class="mascot-pixel-noise"><i></i><i></i><i></i><i></i><i></i></div><div class="mascot-speech">&gt; READY TO BUILD?<span class="cursor-blink">_</span></div>${mascot()}<span class="mascot-ground">VR-01 // LET'S CODE</span></div></section>`;
   }
   function progressBar() {
-    const order = ['setup', 'draw', 'battle', 'judge'];
-    const active = state.phase === 'timeup' ? 2 : state.phase === 'results' ? 3 : order.indexOf(state.phase);
-    const labels = ['PREPARAR', 'SORTEAR', 'CONSTRUIR', 'AVALIAR'];
+    const order = ['setup', 'draw', 'briefing', 'battle', 'judge'];
+    const active = state.phase === 'timeup' ? 3 : state.phase === 'results' ? 4 : order.indexOf(state.phase);
+    const labels = ['PREPARAR', 'SORTEAR', 'BRIEFING', 'CONSTRUIR', 'AVALIAR'];
     return `<div class="stepper wrap" aria-label="Etapas da partida">${labels.map((label, index) => `<div class="step ${index < active ? 'done' : ''} ${index === active ? 'active' : ''}"><span class="step-number">${index < active ? icon('check', 13) : '0' + (index + 1)}</span><span>${label}</span></div>`).join('<div class="step-connector"></div>')}</div>`;
   }
   function panelHead(index, heading, subtitle) {
@@ -302,7 +302,7 @@
       </div>
       <div class="panel-bottom"><div class="panel-bottom-copy"><span class="indicator-live"></span> ${CHALLENGES.length} DESAFIOS NO BARALHO</div><button class="btn btn-primary btn-large" data-action="go-draw">IR PARA ROLETA ${icon('arrow')}</button></div>
     </div><aside class="setup-aside"><div class="aside-mascot"><span class="aside-label">YOUR CODING BUDDY</span>${mascot('#E4B476', 'Mascote do jogo') }<div class="aside-terminal">&gt; no bugs, just vibes<span class="cursor-blink">_</span></div></div>
-      <div class="aside-card"><span class="aside-kicker">✳ COMO FUNCIONA</span><div class="how-row"><span>01</span><div><b>Sorteie um desafio</b><small>App ou ideia + paleta + regra surpresa.</small></div></div><div class="how-row"><span>02</span><div><b>Corra contra o tempo</b><small>${mode.minutes} minutos para ambos criarem sua versão.</small></div></div><div class="how-row"><span>03</span><div><b>Avaliem juntos</b><small>Checklist individual, pontos e vencedor.</small></div></div></div>
+      <div class="aside-card"><span class="aside-kicker">✳ COMO FUNCIONA</span><div class="how-row"><span>01</span><div><b>Sorteie um desafio</b><small>App ou ideia + paleta + regra surpresa.</small></div></div><div class="how-row"><span>02</span><div><b>Leiam o briefing</b><small>Requisitos, pontuação e cores HEX antes da largada.</small></div></div><div class="how-row"><span>03</span><div><b>Corram contra o tempo</b><small>${mode.minutes} minutos para construir.</small></div></div><div class="how-row"><span>04</span><div><b>Avaliem juntos</b><small>Checks individuais, pontos e vencedor.</small></div></div></div>
       <div class="side-footnote">✳ BUILD FAST. THINK FASTER.</div></aside></section>`;
   }
   function wheelSVG() {
@@ -340,9 +340,37 @@
         ${target ? `<div class="challenge-type"><span>${kindText(target.kind)}</span><span>${safely(target.area)}</span></div><h2 class="challenge-name">${safely(target.name)}</h2><p class="challenge-brief">${safely(target.brief)}</p>` : `<div class="mystery-icon">?</div><h2 class="challenge-name mystery">O que vai cair?</h2><p class="challenge-brief">Gire a roleta para descobrir qual aplicativo ou sistema vocês vão construir.</p>`}
         <div class="rule-card-list"><div class="rule-card"><div class="rule-icon">${icon('layers', 18)}</div><div><span>PALETA OBRIGATÓRIA</span><b>${state.palette ? safely(state.palette.name) : 'Surpresa'}</b>${state.palette ? paletteSwatches(state.palette) : ''}</div></div>
         <div class="rule-card"><div class="rule-icon">${icon('bolt', 18)}</div><div><span>REGRA SURPRESA</span><b>${state.twist ? safely(state.twist.name) : 'Surpresa'}</b>${state.twist ? `<small>${safely(state.twist.detail)}</small>` : ''}</div></div></div>
-      </div><div class="panel mission-footer"><span>${icon('clock', 16)} ${d.minutes} MINUTOS</span><span>${d.features} FUNÇÕES PRINCIPAIS</span><button class="btn btn-primary" data-action="start-battle" ${!target || state.spinning ? 'disabled' : ''}>${icon('play', 18)} INICIAR PARTIDA</button></div>
-      <div class="note-line">Ao iniciar, o cronômetro começa imediatamente para os dois jogadores.</div></aside></section>`;
+      </div><div class="panel mission-footer"><span>${icon('clock', 16)} ${d.minutes} MINUTOS</span><span>${d.features} FUNÇÕES PRINCIPAIS</span><button class="btn btn-primary" data-action="go-briefing" ${!target || state.spinning ? 'disabled' : ''}>${icon('arrow', 18)} VER BRIEFING</button></div>
+      <div class="note-line">O briefing aparece antes da partida. O relógio só começa quando os dois estiverem prontos.</div></aside></section>`;
   }
+  function paletteCodeButtons(palette) {
+    const names = ['DESTAQUE', 'FUNDO', 'APOIO'];
+    return palette.colors.map((color, index) => `<button class="palette-code" data-action="copy-hex" data-value="${safely(color)}" title="Copiar ${safely(color)}" aria-label="Copiar a cor ${safely(color)}"><span class="palette-code-swatch" style="background:${safely(color)}"></span><span class="palette-code-label"><b>${safely(color)}</b><small>${names[index]}</small></span>${icon('copy', 14)}</button>`).join('');
+  }
+  function briefing() {
+    const target = challenge();
+    if (!target || !state.palette || !state.twist) return '';
+    const mode = DIFFICULTIES[state.difficulty];
+    const tasks = requirements();
+    return `<section class="main-section wrap briefing-layout" aria-labelledby="briefing-title">
+      <div class="panel briefing-intro"><div class="briefing-top"><span class="panel-kicker">// 03 — BRIEFING DA MISSÃO</span><span class="briefing-waiting"><i></i> RELÓGIO PARADO</span></div>
+        <div class="briefing-hero-content"><div class="briefing-main-copy"><div class="briefing-kicker">MISSÃO DESBLOQUEADA <span>✳</span></div><div class="challenge-type"><span>${kindText(target.kind)}</span><span>${safely(target.area)}</span></div><h1 id="briefing-title">${safely(target.name)}</h1><p>${safely(target.brief)}</p>
+        <div class="briefing-meta"><span>${icon('clock', 16)} ${mode.minutes} MINUTOS</span><span>${icon('target', 16)} ${tasks.length} REQUISITOS</span><span>${icon('trophy', 16)} ${totalPossible()} PONTOS</span></div></div>
+        <div class="briefing-hero-mascot">${mascot('#F08D68', 'Mascote animado com notebook')}<span>READY, SET... CODE_</span></div></div>
+        <div class="briefing-players"><span>${playerAvatar(0)} ${safely(asName(state.players[0], 'Jogador 1'))}</span><strong>VS</strong><span>${playerAvatar(1)} ${safely(asName(state.players[1], 'Jogador 2'))}</span></div>
+      </div>
+      <div class="briefing-grid"><div class="panel briefing-tasks"><div class="briefing-section-head"><div><span class="panel-kicker">// 01 — REQUISITOS DA BATALHA</span><h2>Checklist da missão</h2><p>Estes são os critérios da avaliação. Confiram todos antes de começar.</p></div><span class="briefing-count">${String(tasks.length).padStart(2, '0')} ITENS</span></div>
+        <div class="briefing-task-list">${tasks.map((task, index) => `<div class="briefing-task"><span class="briefing-task-box" aria-hidden="true"></span><span class="briefing-task-content"><strong>${safely(task.label)}</strong>${task.detail ? `<small>${safely(task.detail)}</small>` : ''}</span><span class="briefing-task-points">+${task.points} <small>PTS</small></span></div>`).join('')}</div>
+        <div class="briefing-footnote">${icon('info', 16)} Os checks serão marcados juntos no final da partida, não agora.</div>
+      </div>
+      <aside class="briefing-side"><div class="panel briefing-colors"><span class="panel-kicker">// 02 — CORES OBRIGATÓRIAS</span><h2>${safely(state.palette.name)}</h2><p>Utilizem estas três cores no aplicativo. Clique em cada cor para copiar o código HEX.</p><div class="briefing-color-grid">${paletteCodeButtons(state.palette)}</div><div class="briefing-palette-note">${icon('layers', 16)} ${safely(state.palette.description)}</div></div>
+        <div class="panel briefing-extra"><div class="briefing-extra-head"><span class="briefing-extra-icon">${icon('bolt', 22)}</span><span class="panel-kicker">// 03 — REGRA SURPRESA</span></div><h2>${safely(state.twist.name)}</h2><p>${safely(state.twist.detail)}</p><span class="briefing-extra-bonus">+${mode.wildcardPoints} PONTOS</span></div>
+        <div class="briefing-rules"><span class="panel-kicker">✳ REGRAS DO DUELO</span><p>Os dois jogadores criam a <b>mesma missão</b> com o mesmo prazo. Cada item vale pontos apenas se estiver implementado. A avaliação acontece depois que o tempo acabar.</p></div>
+      </aside></div>
+      <div class="briefing-actions"><div class="briefing-actions-note"><span class="briefing-status-dot"></span><div><strong>Tudo pronto?</strong><small>O cronômetro só começa quando vocês clicarem em iniciar.</small></div></div><div class="briefing-action-buttons"><button class="btn btn-ghost" data-action="back-draw">${icon('refresh', 17)} VOLTAR À ROLETA</button><button class="btn btn-outline" data-action="copy-brief">${icon('copy', 16)} COPIAR BRIEFING</button><button class="btn btn-primary btn-large" data-action="start-battle">${icon('play', 19)} INICIAR BATALHA · ${mode.minutes}:00</button></div></div>
+    </section>`;
+  }
+
   function liveTimer() { return state.timer.running ? Math.max(0, Math.ceil((state.timer.endAt - Date.now()) / 1000)) : Math.max(0, state.timer.remaining); }
   function battle() {
     const target = challenge();
@@ -357,6 +385,7 @@
       <p class="timer-tip">Dica: pressione <kbd>ESPAÇO</kbd> para pausar ou retomar.</p></div>
       <aside class="battle-aside"><div class="panel brief-panel"><span class="panel-kicker">// SEU BRIEFING</span><div class="challenge-type"><span>${kindText(target.kind)}</span><span>${safely(target.area)}</span></div><h2>${safely(target.name)}</h2><p>${safely(target.brief)}</p><div class="brief-divider"></div><h3>CHECKLIST DA MISSÃO <span>${requirements().length} ITENS</span></h3><div class="brief-items">${requirements().map((r, i) => `<div class="brief-item"><span class="brief-empty">${String(i + 1).padStart(2, '0')}</span><span>${safely(r.label)}</span><b>+${r.points}</b></div>`).join('')}</div></div>
       <div class="battle-side-row"><div><small>PALETA</small>${paletteSwatches(state.palette)}<b>${safely(state.palette.name)}</b></div><button class="btn btn-outline" data-action="copy-brief">${icon('copy', 15)} COPIAR BRIEF</button></div>
+      <div class="battle-color-codes" aria-label="Códigos HEX da paleta">${paletteCodeButtons(state.palette)}</div>
       <div class="fair-play">✳ Mesma missão. Mesmo tempo. Construam em seus próprios editores.</div></aside></section>`;
   }
   function timeup() {
@@ -412,7 +441,7 @@
     clearInterval(tickInterval);
     if (state.phase === 'draw' && !state.wheelItems?.length) freshWheel();
     document.title = state.phase === 'timeup' ? 'Tempo esgotado! — Vibe Rush' : 'Vibe Rush — Code. Compete. Repeat.';
-    const page = state.phase === 'setup' ? setup() : state.phase === 'draw' ? draw() : state.phase === 'battle' ? battle() : state.phase === 'timeup' ? timeup() : state.phase === 'judge' ? judge() : result();
+    const page = state.phase === 'setup' ? setup() : state.phase === 'draw' ? draw() : state.phase === 'briefing' ? briefing() : state.phase === 'battle' ? battle() : state.phase === 'timeup' ? timeup() : state.phase === 'judge' ? judge() : result();
     app.innerHTML = `${header()}${hero()}${progressBar()}${page}${historySection()}${footer()}${confirmation()}`;
     if (state.phase === 'battle' && state.timer.running) {
       tickInterval = setInterval(tick, 180);
@@ -476,7 +505,7 @@
     }, 4350);
   }
   function startBattle() {
-    if (!state.drawn || !challenge() || state.spinning) return;
+    if (state.phase !== 'briefing' || !state.drawn || !challenge() || !state.palette || !state.twist || state.spinning) return;
     const duration = DIFFICULTIES[state.difficulty].minutes * 60;
     state.timer = { duration, remaining: duration, running: true, endAt: Date.now() + duration * 1000 };
     state.checks = [{}, {}];
@@ -532,7 +561,7 @@
   function briefingText() {
     const c = challenge();
     if (!c) return '';
-    return 'VIBE RUSH — MISSÃO\n' + kindText(c.kind) + ': ' + c.name + '\n' + c.brief + '\nTempo: ' + DIFFICULTIES[state.difficulty].minutes + ' minutos\nPaleta: ' + state.palette.name + ' (' + state.palette.colors.join(', ') + ')\n\nREQUISITOS:\n' + requirements().map((req, i) => (i + 1) + '. ' + req.label + (req.detail ? ' — ' + req.detail : '')).join('\n');
+    return 'VIBE RUSH — MISSÃO\n' + kindText(c.kind) + ': ' + c.name + '\n' + c.brief + '\nTempo: ' + DIFFICULTIES[state.difficulty].minutes + ' minutos\nPaleta: ' + state.palette.name + ' (' + state.palette.colors.join(', ') + ')\nRegra surpresa: ' + state.twist.name + ' — ' + state.twist.detail + '\n\nCHECKLIST DA MISSÃO:\n' + requirements().map((req, i) => '[ ] ' + (i + 1) + '. ' + req.label + ' (+' + req.points + ' pts)' + (req.detail ? ' — ' + req.detail : '')).join('\n') + '\n\nTOTAL POSSÍVEL: ' + totalPossible() + ' pontos';
   }
   async function copyText(textValue) {
     try {
@@ -579,6 +608,16 @@
         freshWheel(); state.phase = 'draw'; playSound('spin'); saveAndRender(true); break;
       case 'new-wheel': if (!state.spinning) { freshWheel(); playSound(); saveAndRender(); } break;
       case 'spin': spin(); break;
+      case 'go-briefing':
+        if (state.phase === 'draw' && state.drawn && !state.spinning && challenge() && state.palette && state.twist) {
+          const duration = DIFFICULTIES[state.difficulty].minutes * 60;
+          state.timer = { duration, remaining: duration, running: false, endAt: 0 };
+          state.phase = 'briefing'; playSound(); saveAndRender(true);
+        }
+        break;
+      case 'back-draw':
+        if (state.phase === 'briefing') { state.phase = 'draw'; playSound(); saveAndRender(true); }
+        break;
       case 'start-battle': startBattle(); break;
       case 'toggle-timer': toggleTimer(); break;
       case 'request-end': state.confirmEnd = true; saveAndRender(); break;
@@ -592,6 +631,9 @@
       case 'new-game': newGame(); break;
       case 'sound': state.sound = !state.sound; if (state.sound) playSound(); saveAndRender(); break;
       case 'copy-brief': copyText(briefingText()); break;
+      case 'copy-hex':
+        if (state.palette?.colors.includes(value) && /^#[0-9A-Fa-f]{6}$/.test(value)) copyText(value);
+        break;
       case 'share': copyText('VIBE RUSH — RESULTADO\n' + challenge().name + '\n' + state.players[0] + ': ' + score(0) + ' pontos\n' + state.players[1] + ': ' + score(1) + ' pontos\n' + (winnerIndex() < 0 ? 'EMPATE!' : 'Venceu: ' + state.players[winnerIndex()])); break;
       case 'history': $('#ranking')?.scrollIntoView({ behavior: 'smooth', block: 'start' }); break;
       case 'home': if (state.phase === 'setup') window.scrollTo({ top: 0, behavior: 'smooth' }); else if (state.phase === 'results') newGame(); else $('#app')?.scrollIntoView({ behavior: 'smooth', block: 'start' }); break;
