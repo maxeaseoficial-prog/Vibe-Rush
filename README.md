@@ -47,6 +47,14 @@ A pontuação **não inspeciona automaticamente o código do adversário**: os j
 - `styles.css` — tema de terminal, animações e responsividade.
 - `briefing.css` — interface de instruções antes da partida e visualização dos códigos HEX.
 - `app.js` — banco de desafios, roleta, cronômetro, avaliação e histórico.
+- `mission-guides.js` — objetivos detalhados, exemplos reais e critérios de entrega específicos dos 54 desafios.
+- `briefing.css` — estilos do briefing, instruções aprofundadas e exemplos de uso.
 - `favicon.svg` — ícone pixel art.
 
 Design próprio inspirado na linguagem visual de terminais retro, sem dependência de serviços externos de IA ou de marcas dos aplicativos usados como desafios.
+
+## Briefing detalhado
+
+Após o sorteio, cada missão exibe **o que construir**, **um exemplo prático de uso** e **como comprovar a entrega**. O briefing antes do cronômetro inclui um roteiro de implementação adaptado à dificuldade, checklist com testes de aceitação e paleta HEX. O mesmo contexto permanece disponível durante a partida e é incluído ao copiar o briefing.
+
+Todos os 54 desafios possuem um exemplo específico; os dados de exemplo podem ser simulados, mas as interações exigidas nos critérios devem funcionar na interface.
