@@ -189,11 +189,48 @@
     state.twist = null;
   }
   function challenge() { return CHALLENGES.find(item => item.id === state.challenge) || null; }
+
+  function missionGuide(target) {
+    if (!target) return null;
+    const guide = window.VIBE_RUSH_GUIDES?.[target.name];
+    return guide || {
+      description: target.brief + ' Construa as telas necessárias para executar as ações pedidas no checklist, com dados demonstrativos coerentes.',
+      example: 'Exemplo: o usuário abre a tela inicial, escolhe um item e conclui a principal ação da missão. O aplicativo deve mostrar o resultado dessa interação.',
+      proof: 'Demonstre as funcionalidades obrigatórias usando pelo menos três registros fictícios. Telas estáticas ou botões sem efeito não contam.'
+    };
+  }
+  function requirementHelp(label) {
+    const checks = [
+      [/busca|buscar|pesquisa|pesquisar/i, 'Digite uma palavra relacionada à missão: os resultados devem ser filtrados de verdade, e não apenas aparentar uma busca.'],
+      [/carrinho|quantidades|quantidade|checkout|total do pedido|finalizar pedido/i, 'Adicione ou altere um item e confira o resumo, a quantidade e o valor. O estado precisa mudar após o clique.'],
+      [/filtrar|filtro|categorias navegáveis|trocar comunidade|ordenar|alternar entre/i, 'Escolha duas opções diferentes e verifique que a lista ou o conteúdo muda de acordo com a seleção.'],
+      [/player|play e pause|reprodu[çc][ãa]o/i, 'Clique em Play e depois em Pause. O controle e as informações da faixa ou do vídeo devem responder à interação.'],
+      [/criar|cadastrar|adicionar|registrar|compor|escrever e enviar|enviar mensagem|abrir chamado|agendar|reservar|inscrever-se/i, 'Preencha os dados, confirme a ação e veja o novo registro aparecer no local correto, sem precisar recarregar a página.'],
+      [/editar|excluir|cancelar|arquivar|mover|alterar|mudar|status|marcar|curtir|descurtir|salvar|favoritar|seguir|votar|conclu[ií]d/i, 'Realize a ação em um item e verifique a mudança visual ou de estado. Repita em outro item para provar que são independentes.'],
+      [/saldo|receitas|despesas|gr[aá]fico|estimativa|contagem|contador|custo|somar|calcular|pontos|xp|progresso|ranking|pre[çc]o/i, 'Mostre valores ou indicadores coerentes com os dados fictícios. Se houver uma ação relacionada, o resultado deve acompanhá-la.'],
+      [/p[aá]gina|abrir|detalhes|detalhe|visualiza[çc][ãa]o|selecionar|trocar de|perfil|li[çc][ãa]o/i, 'Clique em um item e abra sua própria tela ou seção com título e informações correspondentes. A navegação deve funcionar.'],
+      [/lista|listagem|feed|vitrine|grade|grid|galeria|quadro|mapa|trilha|vis[ãa]o mensal|home|dashboard|resumo|calend[aá]rio|painel|cat[aá]logo|timeline|estante|cards|hist[oó]rico|fileiras|agenda/i, 'Exiba pelo menos três exemplos com informações relevantes (nome, estado, data ou valor). A tela deve ser organizada e legível.'],
+      [/notifica[çc][õo]es|confirma[çc][ãa]o|feedback|alerta|toast|modal|loading/i, 'Acione a função e exiba uma resposta visível e compreensível. Não basta desenhar o botão ou o aviso.']
+    ];
+    const found = checks.find(([pattern]) => pattern.test(label));
+    return 'Como validar: ' + (found
+      ? found[1]
+      : 'Demonstre esta função em uso, com dados relacionados à missão e uma resposta visível à interação. Um elemento apenas decorativo não vale pontos.');
+  }
+  function guideSteps(target) {
+    const chosen = target.features.slice(0, DIFFICULTIES[state.difficulty].features);
+    return [
+      { name: 'ESTRUTURE', detail: 'Comece por ' + chosen[0].toLowerCase() + '. Inclua dados fictícios que permitam testar a interface.' },
+      { name: 'CONECTE', detail: 'Faça funcionar ' + chosen.slice(1, 3).map(x => x.toLowerCase()).join(' e ') + '. Botões precisam alterar conteúdo ou estado.' },
+      { name: 'COMPROVE', detail: 'Teste todos os ' + requirements().length + ' itens do checklist, a regra surpresa e os três códigos HEX antes de entregar.' }
+    ];
+  }
+
   function requirements() {
     const target = challenge();
     if (!target || !state.palette || !state.twist) return [];
     const d = DIFFICULTIES[state.difficulty];
-    const result = target.features.slice(0, d.features).map((label, index) => ({ id: 'feature-' + index, label, points: d.featurePoints, kind: 'feature' }));
+    const result = target.features.slice(0, d.features).map((label, index) => ({ id: 'feature-' + index, label, detail: requirementHelp(label), points: d.featurePoints, kind: 'feature' }));
     result.push({ id: 'colors', label: 'Respeitar a paleta ' + state.palette.name, detail: 'Utilize as cores ' + state.palette.colors.join(', ') + ' de forma reconhecível na interface.', points: 10, kind: 'design' });
     result.push({ id: 'twist', label: state.twist.name, detail: state.twist.detail, points: d.wildcardPoints, kind: 'wildcard' });
     result.push({ id: 'responsive', label: 'Interface responsiva', detail: 'Usável no desktop e em tela de celular.', points: 10, kind: 'quality' });
@@ -337,7 +374,7 @@
       <div class="wheel-foot"><span>✳ ${state.category === 'all' ? 'MODO SURPRESA' : state.category === 'clone' ? 'RECRIAR APLICATIVOS' : 'IDEIAS ORIGINAIS'}</span><span>${state.wheelItems.length} OPÇÕES NA ROLETA</span></div>
       <div class="wheel-buttons"><button class="btn btn-primary btn-large" data-action="spin" ${state.spinning ? 'disabled' : ''}>${icon('shuffle')} ${state.spinning ? 'SORTEANDO...' : state.drawn ? 'GIRAR NOVAMENTE' : 'GIRAR ROLETA'}</button><button class="btn btn-ghost" data-action="new-wheel" ${state.spinning ? 'disabled' : ''} title="Trocar as opções da roleta">${icon('refresh', 18)}</button></div></div>
       <aside class="draw-aside"><div class="panel challenge-preview ${target ? 'revealed' : ''}"><div class="preview-top"><span class="panel-kicker">// MISSÃO DA RODADA</span><span class="preview-status">${target ? '● SORTEADO' : '○ AGUARDANDO'}</span></div>
-        ${target ? `<div class="challenge-type"><span>${kindText(target.kind)}</span><span>${safely(target.area)}</span></div><h2 class="challenge-name">${safely(target.name)}</h2><p class="challenge-brief">${safely(target.brief)}</p>` : `<div class="mystery-icon">?</div><h2 class="challenge-name mystery">O que vai cair?</h2><p class="challenge-brief">Gire a roleta para descobrir qual aplicativo ou sistema vocês vão construir.</p>`}
+        ${target ? `<div class="challenge-type"><span>${kindText(target.kind)}</span><span>${safely(target.area)}</span></div><h2 class="challenge-name">${safely(target.name)}</h2><p class="challenge-brief">${safely(missionGuide(target).description)}</p><div class="mission-preview-examples"><div class="mission-preview-example"><span>✳ EXEMPLO PRÁTICO</span><p>${safely(missionGuide(target).example)}</p></div><div class="mission-preview-proof"><span>✓ COMO COMPROVAR</span><p>${safely(missionGuide(target).proof)}</p></div></div>` : `<div class="mystery-icon">?</div><h2 class="challenge-name mystery">O que vai cair?</h2><p class="challenge-brief">Gire a roleta para descobrir qual aplicativo ou sistema vocês vão construir.</p>`}
         <div class="rule-card-list"><div class="rule-card"><div class="rule-icon">${icon('layers', 18)}</div><div><span>PALETA OBRIGATÓRIA</span><b>${state.palette ? safely(state.palette.name) : 'Surpresa'}</b>${state.palette ? paletteSwatches(state.palette) : ''}</div></div>
         <div class="rule-card"><div class="rule-icon">${icon('bolt', 18)}</div><div><span>REGRA SURPRESA</span><b>${state.twist ? safely(state.twist.name) : 'Surpresa'}</b>${state.twist ? `<small>${safely(state.twist.detail)}</small>` : ''}</div></div></div>
       </div><div class="panel mission-footer"><span>${icon('clock', 16)} ${d.minutes} MINUTOS</span><span>${d.features} FUNÇÕES PRINCIPAIS</span><button class="btn btn-primary" data-action="go-briefing" ${!target || state.spinning ? 'disabled' : ''}>${icon('arrow', 18)} VER BRIEFING</button></div>
@@ -354,10 +391,17 @@
     const tasks = requirements();
     return `<section class="main-section wrap briefing-layout" aria-labelledby="briefing-title">
       <div class="panel briefing-intro"><div class="briefing-top"><span class="panel-kicker">// 03 — BRIEFING DA MISSÃO</span><span class="briefing-waiting"><i></i> RELÓGIO PARADO</span></div>
-        <div class="briefing-hero-content"><div class="briefing-main-copy"><div class="briefing-kicker">MISSÃO DESBLOQUEADA <span>✳</span></div><div class="challenge-type"><span>${kindText(target.kind)}</span><span>${safely(target.area)}</span></div><h1 id="briefing-title">${safely(target.name)}</h1><p>${safely(target.brief)}</p>
+        <div class="briefing-hero-content"><div class="briefing-main-copy"><div class="briefing-kicker">MISSÃO DESBLOQUEADA <span>✳</span></div><div class="challenge-type"><span>${kindText(target.kind)}</span><span>${safely(target.area)}</span></div><h1 id="briefing-title">${safely(target.name)}</h1><p>${safely(missionGuide(target).description)}</p>
         <div class="briefing-meta"><span>${icon('clock', 16)} ${mode.minutes} MINUTOS</span><span>${icon('target', 16)} ${tasks.length} REQUISITOS</span><span>${icon('trophy', 16)} ${totalPossible()} PONTOS</span></div></div>
         <div class="briefing-hero-mascot">${mascot('#F08D68', 'Mascote animado com notebook')}<span>READY, SET... CODE_</span></div></div>
         <div class="briefing-players"><span>${playerAvatar(0)} ${safely(asName(state.players[0], 'Jogador 1'))}</span><strong>VS</strong><span>${playerAvatar(1)} ${safely(asName(state.players[1], 'Jogador 2'))}</span></div>
+      </div>
+      <div class="panel mission-howto" aria-label="Orientações detalhadas da missão">
+        <div class="mission-howto-head"><span class="panel-kicker">// ENTENDA O DESAFIO</span><h2>Como este app deve funcionar?</h2><p>Exemplo real de uso, demonstração esperada e uma sequência para começar a construir.</p></div>
+        <div class="mission-howto-grid"><div class="mission-howto-card"><div class="howto-card-label">01 / EXEMPLO PRÁTICO</div><p>${safely(missionGuide(target).example)}</p></div>
+        <div class="mission-howto-card"><div class="howto-card-label">02 / O QUE PRECISA FUNCIONAR</div><p>${safely(missionGuide(target).proof)}</p></div></div>
+        <div class="mission-build-head">03 / PASSO A PASSO SUGERIDO <small>Adaptado ao modo ${safely(mode.label)} · ${mode.minutes} minutos</small></div>
+        <div class="mission-build-steps">${guideSteps(target).map((item, i) => `<div class="mission-build-step"><span class="mission-build-index">0${i + 1}</span><div><b>${safely(item.name)}</b><p>${safely(item.detail)}</p></div></div>`).join('')}</div>
       </div>
       <div class="briefing-grid"><div class="panel briefing-tasks"><div class="briefing-section-head"><div><span class="panel-kicker">// 01 — REQUISITOS DA BATALHA</span><h2>Checklist da missão</h2><p>Estes são os critérios da avaliação. Confiram todos antes de começar.</p></div><span class="briefing-count">${String(tasks.length).padStart(2, '0')} ITENS</span></div>
         <div class="briefing-task-list">${tasks.map((task, index) => `<div class="briefing-task"><span class="briefing-task-box" aria-hidden="true"></span><span class="briefing-task-content"><strong>${safely(task.label)}</strong>${task.detail ? `<small>${safely(task.detail)}</small>` : ''}</span><span class="briefing-task-points">+${task.points} <small>PTS</small></span></div>`).join('')}</div>
@@ -383,7 +427,7 @@
       <div class="timer-track"><div id="timer-track-fill" style="width:${Math.max(0, fraction * 100)}%"></div></div>
       <div class="timer-controls"><button class="btn btn-primary" data-action="toggle-timer">${icon(state.timer.running ? 'pause' : 'play')} ${state.timer.running ? 'PAUSAR' : 'RETOMAR'}</button><button class="btn btn-ghost" data-action="request-end">${icon('stop')} ENCERRAR AGORA</button></div>
       <p class="timer-tip">Dica: pressione <kbd>ESPAÇO</kbd> para pausar ou retomar.</p></div>
-      <aside class="battle-aside"><div class="panel brief-panel"><span class="panel-kicker">// SEU BRIEFING</span><div class="challenge-type"><span>${kindText(target.kind)}</span><span>${safely(target.area)}</span></div><h2>${safely(target.name)}</h2><p>${safely(target.brief)}</p><div class="brief-divider"></div><h3>CHECKLIST DA MISSÃO <span>${requirements().length} ITENS</span></h3><div class="brief-items">${requirements().map((r, i) => `<div class="brief-item"><span class="brief-empty">${String(i + 1).padStart(2, '0')}</span><span>${safely(r.label)}</span><b>+${r.points}</b></div>`).join('')}</div></div>
+      <aside class="battle-aside"><div class="panel brief-panel"><span class="panel-kicker">// SEU BRIEFING</span><div class="challenge-type"><span>${kindText(target.kind)}</span><span>${safely(target.area)}</span></div><h2>${safely(target.name)}</h2><p>${safely(missionGuide(target).description)}</p><div class="battle-scenario"><strong>EXEMPLO DE USO</strong><p>${safely(missionGuide(target).example)}</p><strong>CRITÉRIO DE ENTREGA</strong><p>${safely(missionGuide(target).proof)}</p></div><div class="brief-divider"></div><h3>CHECKLIST DA MISSÃO <span>${requirements().length} ITENS</span></h3><div class="brief-items">${requirements().map((r, i) => `<div class="brief-item"><span class="brief-empty">${String(i + 1).padStart(2, '0')}</span><span class="battle-task-copy"><strong>${safely(r.label)}</strong>${r.detail ? `<small>${safely(r.detail)}</small>` : ''}</span><b>+${r.points}</b></div>`).join('')}</div></div>
       <div class="battle-side-row"><div><small>PALETA</small>${paletteSwatches(state.palette)}<b>${safely(state.palette.name)}</b></div><button class="btn btn-outline" data-action="copy-brief">${icon('copy', 15)} COPIAR BRIEF</button></div>
       <div class="battle-color-codes" aria-label="Códigos HEX da paleta">${paletteCodeButtons(state.palette)}</div>
       <div class="fair-play">✳ Mesma missão. Mesmo tempo. Construam em seus próprios editores.</div></aside></section>`;
@@ -561,8 +605,35 @@
   function briefingText() {
     const c = challenge();
     if (!c) return '';
-    return 'VIBE RUSH — MISSÃO\n' + kindText(c.kind) + ': ' + c.name + '\n' + c.brief + '\nTempo: ' + DIFFICULTIES[state.difficulty].minutes + ' minutos\nPaleta: ' + state.palette.name + ' (' + state.palette.colors.join(', ') + ')\nRegra surpresa: ' + state.twist.name + ' — ' + state.twist.detail + '\n\nCHECKLIST DA MISSÃO:\n' + requirements().map((req, i) => '[ ] ' + (i + 1) + '. ' + req.label + ' (+' + req.points + ' pts)' + (req.detail ? ' — ' + req.detail : '')).join('\n') + '\n\nTOTAL POSSÍVEL: ' + totalPossible() + ' pontos';
+    const guide = missionGuide(c);
+    const steps = guideSteps(c);
+    return [
+      'VIBE RUSH — MISSÃO',
+      kindText(c.kind) + ': ' + c.name,
+      '',
+      'O QUE CONSTRUIR',
+      guide.description,
+      '',
+      'EXEMPLO PRÁTICO DE USO',
+      guide.example,
+      '',
+      'COMO COMPROVAR A ENTREGA',
+      guide.proof,
+      '',
+      'PASSO A PASSO SUGERIDO',
+      ...steps.map((step, i) => (i + 1) + '. ' + step.name + ': ' + step.detail),
+      '',
+      'Tempo: ' + DIFFICULTIES[state.difficulty].minutes + ' minutos',
+      'Paleta obrigatória: ' + state.palette.name + ' (' + state.palette.colors.join(', ') + ')',
+      'Regra surpresa: ' + state.twist.name + ' — ' + state.twist.detail,
+      '',
+      'CHECKLIST E COMO VALIDAR:',
+      ...requirements().map((req, i) => '[ ] ' + (i + 1) + '. ' + req.label + ' (+' + req.points + ' pts)' + (req.detail ? '\n    ' + req.detail : '')),
+      '',
+      'TOTAL POSSÍVEL: ' + totalPossible() + ' pontos'
+    ].join('\n');
   }
+
   async function copyText(textValue) {
     try {
       await navigator.clipboard.writeText(textValue);
