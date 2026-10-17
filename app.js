@@ -201,6 +201,20 @@
   }
   function requirementHelp(label) {
     const checks = [
+      [/coment[aá]rios|mensagens em|enviar mensagens|chat de live|threads de conversa/i, 'Escreva uma mensagem ou comentário, envie e confira que ele aparece dentro da conversa ou publicação correta.'],
+      [/cadastro|formul[aá]rio|inscri[çc][ãa]o|contato|transfer[eê]ncia simulada/i, 'Apresente os campos necessários. Ao confirmar dados válidos, mostre o registro criado ou uma confirmação com os dados informados.'],
+      [/editor|canvas|camadas|ret[aâ]ngulos|arrastar/i, 'Escolha ou adicione um elemento e modifique uma propriedade. O resultado precisa aparecer imediatamente na área de edição.'],
+      [/indicador|meta|streak|evolu[çc][ãa]o|extrato|tabela|compar[aá][çc][ãa]o entre/i, 'Mostre registros e indicadores numéricos coerentes. Uma ação ou filtro deve produzir uma diferença visível quando aplicável.'],
+      [/origem e destino|tipo de corrida|hor[aá]rios dispon[ií]veis|dias dispon[ií]veis|sele[çc][ãa]o de perfis/i, 'Ofereça pelo menos duas opções. A escolha deve preencher o campo ou alterar a próxima etapa da jornada.'],
+      [/navega[çc][ãa]o|navegar|sidebar|canais de texto|abas|trocar entre|vis[ãa]o semanal|cronograma/i, 'Clique nas opções de navegação e verifique que cada uma mostra seu conteúdo, preservando a seleção atual.'],
+      [/pipeline|kanban|etapas|organizar por dia|prioridade|etiquetas/i, 'Organize itens por coluna, dia ou prioridade e mantenha essa organização consistente ao mover ou editar.'],
+      [/minhas reservas|minhas inscri[çc][õo]es|biblioteca de ideias|projetos dispon[ií]veis/i, 'Mostre os registros da seção correta; ao inserir ou salvar um item, ele deve aparecer nessa lista.'],
+      [/cupom|desconto/i, 'Digite ou aplique um cupom demonstrativo e confira a atualização explícita do desconto e do total.'],
+      [/espera|senha|entregador|entrega|acompanhamento|rota simulada|marcadores clic[aá]veis/i, 'Acione um item ou etapa do fluxo e exiba o novo estado, destino ou atendimento correspondente.'],
+      [/favorit|recomenda[çc][õo]es|amigos|sugest[õo]es|categoriz[aá][çc][ãa]o|categoria/i, 'Mostre sugestões ou categorias coerentes com a missão; a seleção deve alterar o conteúdo exibido quando fizer parte do requisito.'],
+      [/baixar|exporta[çc][ãa]o|cart[ãa]o virtual|controle de gastos|passo a passo|checklist de/i, 'Apresente os dados na estrutura correta e ofereça uma ação utilizável quando o requisito exigir interação.'],
+      [/a[çc][ãa]o de|confirmar|validar resposta|check-in/i, 'Execute a ação e mostre uma confirmação, atualização de registro ou feedback de acerto e erro.'],
+
       [/busca|buscar|pesquisa|pesquisar/i, 'Digite uma palavra relacionada à missão: os resultados devem ser filtrados de verdade, e não apenas aparentar uma busca.'],
       [/carrinho|quantidades|quantidade|checkout|total do pedido|finalizar pedido/i, 'Adicione ou altere um item e confira o resumo, a quantidade e o valor. O estado precisa mudar após o clique.'],
       [/filtrar|filtro|categorias navegáveis|trocar comunidade|ordenar|alternar entre/i, 'Escolha duas opções diferentes e verifique que a lista ou o conteúdo muda de acordo com a seleção.'],
