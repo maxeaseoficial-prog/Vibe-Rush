@@ -134,3 +134,51 @@
  .battle-color-codes .palette-code-label b {font-size:9px;}
  .battle-color-codes .palette-code>svg {display:none;}
 }
+
+/* Briefing expandido: objetivo, exemplos e critérios verificáveis. */
+.challenge-preview .challenge-brief{margin-bottom:16px;line-height:1.75;}
+.mission-preview-examples{display:grid;gap:11px;margin:0 0 22px;}
+.mission-preview-example,.mission-preview-proof{border:1px solid #5f4637;border-radius:7px;background:#332822;padding:15px 16px;}
+.mission-preview-proof{border-color:#3c4336;background:#262c24;}
+.mission-preview-examples span{display:block;font:700 10px var(--mono);letter-spacing:.05em;color:var(--orange);margin-bottom:9px;}
+.mission-preview-proof span{color:#abd99c;}
+.mission-preview-examples p{font-size:12px;line-height:1.75;color:#d9c8b8;margin:0;}
+.mission-howto{padding:28px 29px 24px;background:linear-gradient(115deg,#26211d 0%,#211e1c 65%);}
+.mission-howto-head h2{margin:11px 0 7px;color:#f8ecdc;font-size:24px;letter-spacing:-.6px;}
+.mission-howto-head>p{font-size:13px;line-height:1.6;color:#b9ab9e;margin:0 0 20px;}
+.mission-howto-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px;}
+.mission-howto-card{padding:19px;border:1px solid #674734;border-radius:8px;background:#32261f;}
+.mission-howto-card+.mission-howto-card{border-color:#4d4c3f;background:#2a2b25;}
+.howto-card-label,.mission-build-head{font:700 11px var(--mono);color:var(--orange);letter-spacing:.035em;}
+.mission-howto-card+.mission-howto-card .howto-card-label{color:#c0d7a2;}
+.mission-howto-card p{font-size:14px;line-height:1.75;color:#ebdbca;margin:12px 0 0;}
+.mission-build-head{display:flex;align-items:center;justify-content:space-between;gap:10px;margin:26px 0 13px;padding-top:20px;border-top:1px solid #4c4035;}
+.mission-build-head small{font-size:10px;font-weight:400;color:#a99b8f;}
+.mission-build-steps{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px;}
+.mission-build-step{display:flex;gap:12px;border:1px solid #514237;background:#2c2622;border-radius:7px;padding:14px;}
+.mission-build-index{font:700 12px var(--mono);color:var(--orange);margin-top:1px;}
+.mission-build-step b{font:700 11px var(--mono);color:#f3d7c4;}
+.mission-build-step p{color:#bbb0a5;font-size:12px;line-height:1.65;margin:7px 0 0;}
+.briefing-main-copy>p{max-width:790px;}
+.briefing-task{align-items:flex-start;padding:16px 0;}
+.briefing-task-content small{font-size:11px;line-height:1.7;}
+.battle-scenario{display:grid;gap:6px;margin:19px 0 6px;border-radius:8px;padding:16px;background:#2d2520;border:1px solid #604635;}
+.battle-scenario strong{font:700 10px var(--mono);color:var(--orange);margin-top:4px;}
+.battle-scenario p{font-size:12px;line-height:1.75;color:#d7c7b7;margin:0 0 9px;}
+.battle-task-copy{display:flex;flex-direction:column;gap:7px;flex:1;min-width:0;}
+.battle-task-copy strong{font-size:12px;font-weight:600;line-height:1.45;}
+.battle-task-copy small{font-size:10px;color:#a99e93;line-height:1.6;}
+@media(max-width:940px){
+  .mission-build-steps{grid-template-columns:1fr;}
+}
+@media(max-width:640px){
+  .mission-howto{padding:21px 17px;}
+  .mission-howto-head h2{font-size:21px;}
+  .mission-howto-grid{grid-template-columns:1fr;}
+  .mission-howto-card{padding:15px;}
+  .mission-howto-card p{font-size:13px;}
+  .mission-build-head{flex-direction:column;align-items:flex-start;line-height:1.5;}
+  .mission-preview-examples{gap:9px;}
+  .mission-preview-example,.mission-preview-proof{padding:13px;}
+  .briefing-task-content small{font-size:10px;}
+}
